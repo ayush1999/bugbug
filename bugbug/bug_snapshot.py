@@ -271,7 +271,8 @@ def rollback(bug, when, verbose=True, all_inconsistencies=False):
                     # TODO: try to remove when https://bugzilla.mozilla.org/show_bug.cgi?id=1508695 is fixed.
                     if not all_inconsistencies and any(field.startswith(k) for k in ['cf_']):
                         if verbose:
-                            print(f'{field} is not in bug {bug["id"]}')
+                            #print(f'{field} is not in bug {bug["id"]}')
+                            continue
                     else:
                         assert False, f'{field} is not in bug {bug["id"]}'
 
