@@ -21,12 +21,13 @@ if __name__ == '__main__':
     parser.add_argument('--train', help='Perform training', action='store_true')
     parser.add_argument('--goal',
                         help='Goal of the classifier',
-                        choices=['bug', 'regression', 'tracking', 'qaneeded', 'uplift', 'component', 'devdocneeded', 'defectfeaturetask'],
+                        choices=['bug', 'regression', 'tracking', 'qaneeded', 'uplift', 'component', 'devdocneeded', 'defectfeaturetask', 'assignee'],
                         default='bug')
     parser.add_argument('--ngrams', default='1')
     parser.add_argument('--classifier', help='Type of the classifier', choices=['default', 'nn'], default='default')
     parser.add_argument('--classify', help='Perform evaluation', action='store_true')
     parser.add_argument('--generate-sheet', help='Perform evaluation on bugs from last week and generate a csv file', action='store_true')
+    parser.add_argument('--token', help='Bugzilla token', action='store')
     args = parser.parse_args()
 
     model_file_name = '{}{}model'.format(
@@ -62,6 +63,9 @@ if __name__ == '__main__':
     elif args.goal == 'devdocneeded':
         from bugbug.models.devdocneeded import DevDocNeededModel
         model_class = DevDocNeededModel
+    elif args.goal == 'assignee':
+        from bugbug.models.assignee import AssigneeModel
+        model_class = AssigneeModel
 
     if args.train:
         db.download()
@@ -91,8 +95,10 @@ if __name__ == '__main__':
             input()
 
     if args.generate_sheet:
+        assert args.token is not None, 'A Bugzilla token should be set in order to download bugs'
         today = datetime.utcnow()
         a_week_ago = today - timedelta(7)
+        bugzilla.set_token(args.token)
         bugs = bugzilla.download_bugs_between(a_week_ago, today)
 
         print(f'Classifying {len(bugs)} bugs...')
